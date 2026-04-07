@@ -1,7 +1,4 @@
-// Declare the modules. Rust will look for:
-//   mod cli;      → src/cli.rs
-//   mod template; → src/template.rs
-//   mod writer;   → src/writer.rs
+// fgen-series/part02/src/main.rs
 mod cli;
 mod template;
 mod writer;
@@ -12,12 +9,30 @@ use cli::Cli;
 fn main() {
     let args = Cli::parse();
 
-    // Build the full output path
-    let file_path = args.path.join(&args.name);
+    // Handle --list-templates early exit (if you added that flag)
+    if args.list_templates {
+        println!(" Available templates:");
+        for choice in [
+            cli::TemplateChoice::Plain,
+            cli::TemplateChoice::Json,
+            cli::TemplateChoice::Csv,
+            cli::TemplateChoice::Env,
+            cli::TemplateChoice::Toml,
+        ] {
+            println!("  - {:?}", choice);
+        }
+        return; // Exit early, no file creation needed
+    }
 
-    // Resolve what content to write, using the priority chain in template.rs
+    // Unwrap name safely — clap ensures it's Some when list_templates is false
+    let name = args.name.as_ref().expect("--name is required");
+    
+    // Build the full output path (now name is &String, which implements AsRef<Path>)
+    let file_path = args.path.join(name);
+
+    // Resolve content (pass &str, not &Option<String>)
     let content = template::resolve_content(
-        &args.name,
+        name,  // &String coerces to &str
         args.content,
         args.template,
     );
@@ -25,19 +40,16 @@ fn main() {
     // Write and handle the result
     match writer::write_file(&file_path, &content) {
         Ok(_) => {
-            println!("✅  Created: {}", file_path.display());
-
-            // Show the user which template was used (or that it was custom/empty)
+            println!(" Created: {}", file_path.display());
             if content.is_empty() {
                 println!("    (empty file)");
             } else {
-                // Show just the first line as a preview
                 let preview = content.lines().next().unwrap_or("");
                 println!("    Preview: {}", preview);
             }
         }
         Err(e) => {
-            eprintln!("❌  Failed: {}", e);
+            eprintln!(" Failed: {}", e);
             std::process::exit(1);
         }
     }

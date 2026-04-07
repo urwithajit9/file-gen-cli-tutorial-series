@@ -3,5 +3,32 @@ name = "fgen-part02"
 version = "0.2.0"
 edition = "2024"
 
+[lib]
+# Make the library public so binaries can import from it
+path = "src/lib.rs"
+
+[[bin]]
+name = "level_1"
+path = "src/bin/level_1.rs"
+
+[[bin]]
+name = "level_2"
+path = "src/bin/level_2.rs"
+
+[[bin]]
+name = "level_3"
+path = "src/bin/level_3.rs"
+
+[[bin]]
+name = "final"
+path = "src/bin/final.rs"
+# # Or use main.rs as the default binary:
+# [[bin]]
+# name = "fgen-part02"
+# path = "src/main.rs"
+
 [dependencies]
 clap.workspace = true   # inherits version from workspace root
+
+[dev-dependencies]
+tempfile = "3.8"  # For Level 3 integration tests

@@ -48,6 +48,7 @@ fn detect_from_extension(name: &str) -> Option<TemplateChoice> {
         "json" => Some(TemplateChoice::Json),
         "csv"  => Some(TemplateChoice::Csv),
         "env"  => Some(TemplateChoice::Env),
+        "toml" => Some(TemplateChoice::Toml),
         "txt" | "text" | "md" => Some(TemplateChoice::Plain),
         // Any other extension → no template detected
         _ => None,
@@ -55,7 +56,7 @@ fn detect_from_extension(name: &str) -> Option<TemplateChoice> {
 }
 
 /// Turn a TemplateChoice into actual file content.
-fn render_template(choice: TemplateChoice) -> String {
+pub fn render_template(choice: TemplateChoice) -> String {
     match choice {
         TemplateChoice::Plain => {
             String::from("# New file\n")
@@ -82,7 +83,24 @@ fn render_template(choice: TemplateChoice) -> String {
                  # SECRET_KEY=changeme\n"
             )
         }
+        // ← Level 1 implementation
+        TemplateChoice::Toml => {
+            String::from("[section]\nkey = \"value\"\n" )
+            }
     }
+}
+
+
+/// List all templates with their example output (for --list-templates)
+pub fn list_all_templates() -> Vec<(TemplateChoice, &'static str)> {
+    use TemplateChoice::*;
+    vec![
+        (Plain, "# New file\n"),
+        (Json, "{\n  \"\": \"\"\n}\n"),
+        (Csv, "id,name,value\n1,example,0\n"),
+        (Env, "# APP_NAME=myapp\nAPP_ENV=development\n"),
+        (Toml, "[section]\nkey = \"value\"\n"),
+    ]
 }
 
 // ─── Unit tests ──────────────────────────────────────────────────────────────
@@ -99,6 +117,19 @@ mod tests {
     fn detect_json_extension() {
         let result = detect_from_extension("config.json");
         assert!(matches!(result, Some(TemplateChoice::Json)));
+    }
+
+    #[test]
+    fn detect_toml_extension() {
+        let result = detect_from_extension("config.toml");
+        assert!(matches!(result, Some(TemplateChoice::Toml)));
+    }
+
+    #[test]
+    fn render_toml_template() {
+        let content = render_template(TemplateChoice::Toml);
+        assert!(content.contains("[section]"));
+        assert!(content.contains("key = \"value\""));
     }
 
     #[test]

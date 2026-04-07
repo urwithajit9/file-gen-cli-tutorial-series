@@ -16,6 +16,8 @@ pub enum TemplateChoice {
     Csv,
     /// An .env file with commented example variables
     Env,
+    /// A TOML file with example sections and keys
+    Toml,
 }
 
 /// fgen — generate files from the command line
@@ -27,8 +29,8 @@ pub enum TemplateChoice {
 )]
 pub struct Cli {
     /// Name of the file to create (e.g. notes.txt, data.csv)
-    #[arg(short, long)]
-    pub name: String,
+    #[arg(short, long, required_unless_present = "list_templates")]
+    pub name: Option<String>,
 
     /// Content to write into the file (overrides template content)
     #[arg(short, long)]
@@ -41,4 +43,8 @@ pub struct Cli {
     /// Explicitly choose a file template (overrides extension detection)
     #[arg(short, long, value_enum)]
     pub template: Option<TemplateChoice>,
+
+    /// List all available templates
+    #[arg(long, conflicts_with_all = ["name", "content", "template", "path"])]
+    pub list_templates: bool,
 }
