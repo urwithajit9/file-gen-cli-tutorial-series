@@ -1,11 +1,11 @@
 # fgen-series/Cargo.toml
 [workspace]
 members = [
-    "part01",
-    # "part02",  # add when ready
+    "part01", "part02",
+   
 ]
 resolver = "2"
 
 # Optional: shared dependencies
 [workspace.dependencies]
-# Add any dependencies used across parts
+clap = { version = "4", features = ["derive"] }
