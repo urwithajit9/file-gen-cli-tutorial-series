@@ -1,8 +1,11 @@
-[package]
-name = "fgen"
-version = "0.1.0"
-edition = "2024"
-default-run = "fgen"
+# fgen-series/Cargo.toml
+[workspace]
+members = [
+    "part01",
+    # "part02",  # add when ready
+]
+resolver = "2"
 
-[dependencies]
-clap = { version = "4.6.0", features = ["derive"] }
+# Optional: shared dependencies
+[workspace.dependencies]
+# Add any dependencies used across parts
